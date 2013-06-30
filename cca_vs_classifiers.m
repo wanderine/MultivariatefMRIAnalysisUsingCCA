@@ -74,9 +74,9 @@ mean_svm_weights = zeros(27,1);
 %--------------------------------------------------------------------
 
 % Set number of simulation runs,
-% the classifier typically require ~100 runs to show nice weights,
+% the classifier typically require ~10 runs to show nice weights,
 % while a single run is sufficient for CCA
-number_of_runs = 100;
+number_of_runs = 10;
 
 % Set the general noise level,
 % note that the processing time for the classifier increases significantly
@@ -384,7 +384,9 @@ for run = 1:number_of_runs
         % Calculate SVM weights
         svm_weights = zeros(27,1);
         for i = 1:27
-            svm_weights(i) = sum(svmstruct.Alpha .* svmstruct.GroupNames(svmstruct.SupportVectorIndices) .* svmstruct.SupportVectors(:,i));
+            % The alphas are negative for one group and positive for the
+            % other, so we should not multiply with class label          
+            svm_weights(i) = sum(svmstruct.Alpha .* svmstruct.SupportVectors(:,i));
         end
         mean_svm_weights = mean_svm_weights + svm_weights;
         
@@ -423,7 +425,9 @@ for run = 1:number_of_runs
         % Calculate SVM weights
         svm_weights = zeros(27,1);
         for i = 1:27
-            svm_weights(i) = sum(svmstruct.Alpha .* svmstruct.GroupNames(svmstruct.SupportVectorIndices) .* svmstruct.SupportVectors(:,i));
+            % The alphas are negative for one group and positive for the
+            % other, so we should not multiply with class label
+            svm_weights(i) = sum(svmstruct.Alpha .* svmstruct.SupportVectors(:,i));
         end
         mean_svm_weights = mean_svm_weights + svm_weights;
         
@@ -442,12 +446,12 @@ for run = 1:number_of_runs
         end
         
         % Shift labels to adjust for BOLD delay
-        training_labels = paradigm(1:N/2);
+        training_labels = paradigm(1:N/2)*2-1;  % to make the labels 1 or -1
         temp = training_labels(1:3);
         training_labels(1:3) = training_labels(end-2:end);
         training_labels(4:end) = [temp ; training_labels(5:end-2)];
         
-        testing_labels = paradigm(N/2+1:end);
+        testing_labels = paradigm(N/2+1:end)*2-1;  % to make the labels 1 or -1
         testing_labels(1:3) = testing_labels(end-2:end);
         testing_labels(4:end) = [temp ; testing_labels(5:end-2)];
         
@@ -534,8 +538,6 @@ subplot(3,1,1); image(100*[true_pattern(:,:,1)/norm(true_pattern(:)) zeros(3,3) 
 subplot(3,1,2); image(100*[true_pattern(:,:,2)/norm(true_pattern(:)) zeros(3,3) abs(mean_svm_weights(:,:,2))/norm(mean_svm_weights(:)) zeros(3,3) abs(mean_gamma(:,:,2))/norm(mean_gamma(:)) ]); axis off;
 subplot(3,1,3); image(100*[true_pattern(:,:,3)/norm(true_pattern(:)) zeros(3,3) abs(mean_svm_weights(:,:,3))/norm(mean_svm_weights(:)) zeros(3,3) abs(mean_gamma(:,:,3))/norm(mean_gamma(:)) ]); axis off;
 
-%print -dpng patterns_cba_vs_cca100.png
-%print -depsc patterns_cba_vs_cca100.eps
 
 figure
 plot([ttests_GLM1 ttests_GLM2 ttests_GLM3 ttests_GLM4])
@@ -548,9 +550,6 @@ legend('t-test value','Canonical correlation','Classification performance')
 title(sprintf('Activation values for GLM, CCA and CBA for 4 subjects and 100 runs per subject.'))
 xlabel('Runs & Subjects')
 ylabel('Activity value')
-
-%print -dpng activation_glm_vs_cca_vs_cba.png
-%print -depsc activation_glm_vs_cca_vs_cba.eps
 
 %-------------------------------------------------------------------------------------------
 
