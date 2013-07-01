@@ -76,7 +76,7 @@ mean_svm_weights = zeros(27,1);
 % Set number of simulation runs,
 % the classifier typically require ~10 runs to show nice weights,
 % while a single run is sufficient for CCA
-number_of_runs = 10;
+number_of_runs = 100;
 
 % Set the general noise level,
 % note that the processing time for the classifier increases significantly
@@ -538,7 +538,6 @@ subplot(3,1,1); image(100*[true_pattern(:,:,1)/norm(true_pattern(:)) zeros(3,3) 
 subplot(3,1,2); image(100*[true_pattern(:,:,2)/norm(true_pattern(:)) zeros(3,3) abs(mean_svm_weights(:,:,2))/norm(mean_svm_weights(:)) zeros(3,3) abs(mean_gamma(:,:,2))/norm(mean_gamma(:)) ]); axis off;
 subplot(3,1,3); image(100*[true_pattern(:,:,3)/norm(true_pattern(:)) zeros(3,3) abs(mean_svm_weights(:,:,3))/norm(mean_svm_weights(:)) zeros(3,3) abs(mean_gamma(:,:,3))/norm(mean_gamma(:)) ]); axis off;
 
-
 figure
 plot([ttests_GLM1 ttests_GLM2 ttests_GLM3 ttests_GLM4])
 hold on
@@ -550,6 +549,17 @@ legend('t-test value','Canonical correlation','Classification performance')
 title(sprintf('Activation values for GLM, CCA and CBA for 4 subjects and 100 runs per subject.'))
 xlabel('Runs & Subjects')
 ylabel('Activity value')
+
+figure
+hist([ttests_GLM1 ttests_GLM2 ttests_GLM3 ttests_GLM4]);
+hold on
+hist([canon_corrs1 canon_corrs2 canon_corrs3 canon_corrs4]);
+hold on
+hist(100*[classification_performances1 classification_performances2 classification_performances3 classification_performances4 ]);
+hold off
+legend('t-test values','Canonical correlations','Classification performances')
+xlabel('Activity value')
+ylabel('Frequency')
 
 %-------------------------------------------------------------------------------------------
 
